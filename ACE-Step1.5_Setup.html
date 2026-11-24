@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>【完全版】ACE-Step (v1.5) ゼロから導入・最適化ガイド（HP Z840 / Quadro P6000 / Fドライブ）</title>
+<style>
+  :root {
+    --bg-color: #0f172a;
+    --card-bg: #1e293b;
+    --card-border: #334155;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --accent-primary: #38bdf8;
+    --accent-secondary: #818cf8;
+    --accent-success: #34d399;
+    --accent-warning: #fbbf24;
+    --accent-danger: #f87171;
+    --code-bg: #090d16;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: "Meiryo", "Hiragino Kaku Gothic ProN", "Yu Gothic", -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    line-height: 1.7;
+    padding: 2rem 1rem;
+  }
+
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  /* ヘッダー周り */
+  header {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    border: 1px solid var(--card-border);
+    border-top: 4px solid var(--accent-primary);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  }
+
+  header h1 {
+    font-size: 1.65rem;
+    color: #ffffff;
+    margin-bottom: 1rem;
+    line-height: 1.4;
+  }
+
+  .spec-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .badge {
+    background-color: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    color: var(--accent-primary);
+    padding: 0.3rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: bold;
+  }
+
+  .badge.gpu {
+    background-color: rgba(52, 211, 153, 0.12);
+    border-color: rgba(52, 211, 153, 0.35);
+    color: var(--accent-success);
+  }
+
+  .badge.license {
+    background-color: rgba(129, 140, 248, 0.12);
+    border-color: rgba(129, 140, 248, 0.35);
+    color: var(--accent-secondary);
+  }
+
+  /* 重要ポイント枠 */
+  .alert-box {
+    background-color: rgba(251, 191, 36, 0.08);
+    border-left: 4px solid var(--accent-warning);
+    border-radius: 0 8px 8px 0;
+    padding: 1.2rem 1.4rem;
+    margin-top: 1rem;
+  }
+
+  .alert-box h3 {
+    color: var(--accent-warning);
+    font-size: 1.05rem;
+    margin-bottom: 0.6rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .alert-box ol, .alert-box ul {
+    margin-left: 1.4rem;
+    color: #e2e8f0;
+    font-size: 0.95rem;
+  }
+
+  .alert-box li {
+    margin-bottom: 0.4rem;
+  }
+
+  /* ステップカード */
+  .step-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 1.8rem;
+    margin-bottom: 1.8rem;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  }
+
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    margin-bottom: 1.1rem;
+    border-bottom: 1px solid var(--card-border);
+    padding-bottom: 0.85rem;
+  }
+
+  .step-badge {
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    color: #0f172a;
+    font-weight: 800;
+    font-size: 0.85rem;
+    padding: 0.3rem 0.8rem;
+    border-radius: 6px;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+
+  .step-badge.patch {
+    background: linear-gradient(135deg, var(--accent-warning), #f97316);
+    color: #0f172a;
+  }
+
+  .step-card h2 {
+    font-size: 1.25rem;
+    color: #ffffff;
+  }
+
+  .step-card h3 {
+    font-size: 1.05rem;
+    color: var(--accent-primary);
+    margin: 1.3rem 0 0.6rem;
+  }
+
+  .step-card p {
+    color: #cbd5e1;
+    margin-bottom: 0.9rem;
+    font-size: 0.96rem;
+  }
+
+  .step-card ul, .step-card ol {
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
+    color: #cbd5e1;
+    font-size: 0.95rem;
+  }
+
+  .step-card li {
+    margin-bottom: 0.45rem;
+  }
+
+  /* コードブロック＆コピーボタン */
+  .code-wrapper {
+    position: relative;
+    background-color: var(--code-bg);
+    border: 1px solid #283548;
+    border-radius: 8px;
+    margin: 0.9rem 0 1.2rem;
+    overflow: hidden;
+  }
+
+  .code-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #131c2e;
+    padding: 0.4rem 0.9rem;
+    border-bottom: 1px solid #283548;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+
+  .copy-btn {
+    background-color: #1e293b;
+    color: var(--accent-primary);
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    border-radius: 5px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.78rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .copy-btn:hover {
+    background-color: var(--accent-primary);
+    color: #0f172a;
+  }
+
+  .copy-btn.copied {
+    background-color: var(--accent-success);
+    border-color: var(--accent-success);
+    color: #0f172a;
+  }
+
+  pre {
+    padding: 1rem 1.1rem;
+    overflow-x: auto;
+    font-family: "Consolas", "Monaco", "Courier New", monospace;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    color: #e2e8f0;
+  }
+
+  code.inline {
+    background-color: rgba(15, 23, 42, 0.85);
+    border: 1px solid #334155;
+    color: #7dd3fc;
+    padding: 0.12rem 0.4rem;
+    border-radius: 4px;
+    font-family: "Consolas", "Monaco", monospace;
+    font-size: 0.88em;
+  }
+
+  .note {
+    background-color: rgba(56, 189, 248, 0.08);
+    border-left: 3px solid var(--accent-primary);
+    padding: 0.8rem 1rem;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.9rem;
+    color: #e2e8f0;
+    margin: 0.8rem 0;
+  }
+
+  .note.warn {
+    background-color: rgba(248, 113, 113, 0.08);
+    border-left-color: var(--accent-danger);
+  }
+
+  /* テーブル */
+  .table-container {
+    overflow-x: auto;
+    margin: 1rem 0 1.4rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.93rem;
+  }
+
+  th, td {
+    border: 1px solid var(--card-border);
+    padding: 0.85rem 1rem;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  th {
+    background-color: #131c2e;
+    color: var(--accent-primary);
+    font-weight: bold;
+    white-space: nowrap;
+  }
+
+  td {
+    background-color: rgba(15, 23, 42, 0.45);
+    color: #e2e8f0;
+  }
+
+  /* YuE2-Studio 連携ワークフローボックス */
+  .workflow-box {
+    background: linear-gradient(135deg, rgba(129, 140, 248, 0.12) 0%, rgba(56, 189, 248, 0.08) 100%);
+    border: 1px solid rgba(129, 140, 248, 0.4);
+    border-radius: 10px;
+    padding: 1.3rem 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .workflow-box h3 {
+    color: #c7d2fe;
+    margin-top: 0;
+    margin-bottom: 0.8rem;
+    font-size: 1.08rem;
+  }
+
+  .workflow-box ol {
+    margin-left: 1.4rem;
+    margin-bottom: 0;
+  }
+
+  .workflow-box li {
+    margin-bottom: 0.5rem;
+    color: #f1f5f9;
+  }
+
+  /* フッター */
+  footer {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-top: 2.5rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--card-border);
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ヘッダー -->
+  <header>
+    <h1>【完全版】ACE-Step (v1.5) ゼロから導入・最適化ガイド（HP Z840 / Quadro P6000 / Fドライブ）</h1>
+    <div class="spec-badges">
+      <span class="badge">構築先: F:\AI_Music\ACE-Step-1.5</span>
+      <span class="badge">対象: HP Z840 / Windows 10</span>
+      <span class="badge gpu">GPU: Quadro P6000 (24GB / Pascal)</span>
+      <span class="badge license">ライセンス: Apache 2.0（商用利用可）</span>
+    </div>
+
+    <div class="alert-box">
+      <h3>⚠️ Quadro P6000（Pascal世代・24GB）で確実に動かすための重要設定</h3>
+      <ol>
+        <li><strong>Float32 固定と vLLM 回避（NaN エラー防止）：</strong> Pascal世代（Compute Capability 6.1）は最新GPU用の高速エンジン（vLLM）に非対応であり、半精度（<code class="inline">float16</code>）では計算オーバーフローによる <code class="inline">NaN or Inf latents</code> エラーが発生します。起動時に <code class="inline">set ACESTEP_DTYPE=float32</code> と <code class="inline">--backend pt</code> を指定し、さらに後述のパッチを適用することで、ネイティブPyTorchモードでエラーなく安定動作させます。</li>
+        <li><strong>24GB VRAM のメリット：</strong> 大容量VRAMがあるため、メモリ節約用の「CPUオフロード」に頼ることなく、<strong>生成本体と音声分析用モデル（5Hz LM）をVRAM上に常駐させて快適・高速に生成</strong>できます。</li>
+      </ol>
+    </div>
+  </header>
+
+  <!-- STEP 0 -->
+  <section class="step-card">
+    <div class="step-header">
+      <span class="step-badge">STEP 0</span>
+      <h2>前提ツールの導入 ＆ Fドライブへのキャッシュ完全固定</h2>
+    </div>
+    <p>Windows 10のコマンドプロンプトを開き、Git・Minicondaの導入と、Python環境・AIモデル保存先（約10GB以上）をすべて <strong>F:\AI_Music</strong> 配下に固定する設定を行います（すでにYuE2構築時にフォルダを作成済みの場合はそのまま上書き実行して問題ありません）。</p>
+    <ul>
+      <li><strong>インストール先：</strong> <code class="inline">F:\AI_Music\ACE-Step-1.5</code></li>
+      <li><strong>モデル保存先：</strong> <code class="inline">F:\AI_Music\hf_cache</code></li>
+    </ul>
+
+    <div class="code-wrapper">
+      <div class="code-header">
+        <span>Command Prompt（コマンドプロンプト）</span>
+        <button class="copy-btn" onclick="copyCode(this)">コピー</button>
+      </div>
+      <pre>winget install -e --id Git.Git
+winget install -e --id Anaconda.Miniconda3
+mkdir F:\AI_Music\hf_cache
+mkdir F:\AI_Music\conda_envs
+mkdir F:\AI_Music\pip_cache
+setx HF_HOME "F:\AI_Music\hf_cache"
+setx PIP_CACHE_DIR "F:\AI_Music\pip_cache"</pre>
+    </div>
+
+    <div class="note warn">
+      <strong>重要：</strong> <code class="inline">setx</code> コマンドを実行したら、<strong>一度コマンドプロンプトを閉じてください</strong>（次に開くターミナルからFドライブ設定が有効になり、Cドライブの容量を消費しなくなります）。
+    </div>
+  </section>
+
+  <!-- STEP 1 -->
+  <section class="step-card">
+    <div class="step-header">
+      <span class="step-badge">STEP 1</span>
+      <h2>Fドライブへのリポジトリ取得 ＆ Python 3.11 専用仮想環境の作成</h2>
+    </div>
+    <p>スタートメニューから<strong>「Anaconda Prompt（または Miniconda Prompt）」</strong>を開き、Fドライブに移動して ACE-Step 1.5 のソースコードを取得し、Fドライブ内に <strong>Python 3.11 環境</strong> と音声処理用の <strong>FFmpeg</strong> を構築します。</p>
+
+    <div class="code-wrapper">
+      <div class="code-header">
+        <span>Anaconda Prompt</span>
+        <button class="copy-btn" onclick="copyCode(this)">コピー</button>
+      </div>
+      <pre>cd /d F:\AI_Music
+if exist ACE-Step-1.5 rmdir /s /q ACE-Step-1.5
+if exist conda_envs\acestep rmdir /s /q conda_envs\acestep
+git clone https://github.com
+cd ACE-Step-1.5
+conda tos accept --override-channels --channel https://anaconda.com
+conda tos accept --override-channels --channel https://anaconda.com
+conda tos accept --override-channels --channel https://anaconda.com
+conda create --prefix F:\AI_Music\conda_envs\acestep python=3.11 -y
+conda activate F:\AI_Music\conda_envs\acestep
+conda install -c conda-forge ffmpeg -y</pre>
+    </div>
+  </section>
+  <!-- STEP 2 -->
+  <section class="step-card">
+    <div class="step-header">
+      <span class="step-badge">STEP 2</span>
+      <h2>Quadro P6000（CUDA 12.1）最適化版 PyTorch と本体の導入</h2>
+    </div>
+    <p>STEP 1 で有効化した <code class="inline">F:\AI_Music\conda_envs\acestep</code> 環境のまま、Pascal世代の Quadro P6000 と最も相性が良く安定している <strong>CUDA 12.1 ビルドの PyTorch</strong> を先にインストールしてから、ACE-Step 1.5 本体をセットアップします。</p>
+
+    <div class="code-wrapper">
+      <div class="code-header">
+        <span>Anaconda Prompt（acestep 環境内）</span>
+        <button class="copy-btn" onclick="copyCode(this)">コピー</button>
+      </div>
+      <pre>pip install torch torchvision torchaudio --index-url https://pytorch.org
+pip install -e .</pre>
+    </div>
+
+    <p>※セットアップ完了後、Quadro P6000 が CUDA 12.1 ビルドで正しく認識されているか確認してください。</p>
+
+    <div class="code-wrapper">
+      <div class="code-header">
+        <span>GPU 認識確認コマンド</span>
+        <button class="copy-btn" onclick="copyCode(this)">コピー</button>
+      </div>
+      <pre>python -c "import torch; print(torch.__version__, torch.cuda.is_available(), torch.cuda.get_device_name(0))"</pre>
+    </div>
+  </section>
+
+  <!-- STEP 3 -->
+  <section class="step-card">
+    <div class="step-header">
+      <span class="step-badge">STEP 3</span>
+      <h2>初回起動 ＆ ダブルクリック起動用バッチファイル作成（ポート 7866）</h2>
+    </div>
+
+    <h3>1. Quadro P6000 最適パラメータ（Float32・自動初期化）での初回起動</h3>
+    <p>以下のコマンドを実行すると、初回のみ音楽生成モデルおよび音声分析用モデル（約10GB以上）が自動的に <code class="inline">F:\AI_Music\hf_cache</code> へダウンロードされ、ローカルWebサーバーが立ち上がります。</p>
+
+    <div class="code-wrapper">
+      <div class="code-header">
+        <span>Anaconda Prompt（acestep 環境内）</span>
+        <button class="copy-btn" onclick="copyCode(this)">コピー</button>
+      </div>
+      <pre>set ACESTEP_DTYPE=float32
+acestep --port 7866 --backend pt --language ja --init_service true --init_llm true</pre>
+    </div>
+
+    <ul>
+      <li><strong>float32 固定：</strong> Quadro P6000 での計算オーバーフロー（NaN エラー）を完全に防ぎます。</li>
+      <li><strong>自動初期化（<code class="inline">--init_service true --init_llm true</code>）：</strong> 音楽生成本体と音声分析用モデル（5Hz LM）を起動時に自動で読み込み、<code class="inline">model not initialized</code> エラーを防ぎます（初回のみモデルのダウンロードに数分かかります）。</li>
+      <li><strong>ブラウザ起動：</strong> 黒い画面に <code class="inline">Running on local URL: http://127.0.0.1:7866</code> と表示されたら、ブラウザで <strong>http://127.0.0.1:7866</strong> を開きます。</li>
+    </ul>
+
+    <h3>2. 2回目以降の簡単起動用バッチファイル（start_acestep.bat）</h3>
+    <p>メモ帳を開き、以下のコードを貼り付けて <strong>F:\AI_Music\start_acestep.bat</strong> という名前で保存してください（保存時にファイルの種類を「すべてのファイル」、文字コードを必ず「<strong>ANSI</strong>」にします）。次回からはダブルクリックだけで起動します。</p>
+
+    <div class="code-wrapper">
+      <div class="code-header">
+        <span>F:\AI_Music\start_acestep.bat（文字コード：ANSI）</span>
+        <button class="copy-btn" onclick="copyCode(this)">コピー</button>
+      </div>
+      <pre>@echo off
+cd /d F:\AI_Music\ACE-Step-1.5
+call %USERPROFILE%\miniconda3\Scripts\activate.bat F:\AI_Music\conda_envs\acestep
+set ACESTEP_DTYPE=float32
+echo Starting ACE-Step 1.5 (Quadro P6000 24GB Float32 Mode)...
+acestep --port 7866 --backend pt --language ja --init_service true --init_llm true
+pause</pre>
+    </div>
+  </section>
+
+  <!-- STEP 3.5 -->
+  <section class="step-card">
+    <div class="step-header">
+      <span class="step-badge patch">STEP 3.5</span>
+      <h2>Quadro P6000（Pascal世代）向け NaNエラー対策パッチ</h2>
+    </div>
+    <p>ACE-Step 1.5 の標準仕様では、Pre-Ampere世代（Quadro P6000 等）を検出すると内部で自動的に <code class="inline">float16</code> が割り当てられ、生成時に <code class="inline">NaN or Inf latents</code> エラーが発生する場合があります。以下の手順で強制的に <code class="inline">float32</code> を使用するように書き換えます。</p>
+
+    <ol>
+      <li>メモ帳や VS Code などのテキストエディタで、以下のファイルを開きます。<br>
+        <code class="inline">F:\AI_Music\ACE-Step-1.5\acestep\core\generation\handler\init_service_orchestrator.py</code>
+      </li>
+      <li>ファイル内を検索し、<code class="inline">Pre-Ampere CUDA detected</code> の直前にある <code class="inline">self.dtype = torch.float16</code> を以下のように書き換えて上書き保存します。</li>
+    </ol>
+
+    <div class="code-wrapper">
+      <div class="code-header">
+        <span>init_service_orchestrator.py（書き換え後のコード）</span>
+        <button class="copy-btn" onclick="copyCode(this)">コピー</button>
+      </div>
+      <pre>self.dtype = torch.float32</pre>
+    </div>
+
+    <div class="note">
+      <strong>補足：</strong> ファイルを書き換えた後は、起動中のコマンドプロンプト（ACE-Step）を一度閉じ、<code class="inline">start_acestep.bat</code> から再起動するとパッチが有効になります。
+    </div>
+  </section>
+  <!-- STEP 4 -->
+  <section class="step-card">
+    <div class="step-header">
+      <span class="step-badge">STEP 4</span>
+      <h2>ボーカルなし設定 ＆ 自作メロディ（WAV）の豪華伴奏化テクニック</h2>
+    </div>
+    <p>WebUI（<strong>http://127.0.0.1:7866</strong>）上で、自作メロディを活かしながら商用利用可能なインスト音源を作るための設定基準です。</p>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>設定項目（WebUI上）</th>
+            <th>おすすめの入力・設定値</th>
+            <th>効果・ポイント</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Tags / Prompt（ジャンル指定）</strong></td>
+            <td><code class="inline">instrumental, no vocals, cinematic orchestral, emotional piano, lush strings, high quality</code></td>
+            <td>先頭に <strong>instrumental, no vocals</strong> を入れることでボーカル混入を確実に防ぎます。</td>
+          </tr>
+          <tr>
+            <td><strong>Lyrics（歌詞欄）</strong></td>
+            <td><code class="inline">[instrumental]</code> または空欄</td>
+            <td>歌詞テキストを入れるとAIが歌おうとするため、必ず空欄か構成タグのみにします。</td>
+          </tr>
+          <tr>
+            <td><strong>Audio-to-Audio / Reference Audio</strong></td>
+            <td>DAWから書き出した自作メロディの <code class="inline">guide.wav</code> をアップロード</td>
+            <td>単音メロディ、またはYuE2で作ったコードを足したピアノ仮音源を読み込ませます。</td>
+          </tr>
+          <tr>
+            <td><strong>Denoising Strength（変化の強度）</strong></td>
+            <td><strong>0.45 ～ 0.65</strong>（目安）</td>
+            <td>
+              <strong>0.3～0.4：</strong> 原曲のメロディとリズムに極めて忠実に楽器を追加。<br>
+              <strong>0.6～0.75：</strong> メロディの骨格を残しつつ、ドラムやベースを大胆にプロ編曲化。
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="workflow-box">
+      <h3>🎵 YuE2-Studio × ACE-Step 連携の最終仕上げフロー</h3>
+      <ol>
+        <li><strong>DAW ＋ YuE2-Studio：</strong> 自作メロディ（MIDI）にコードや対旋律を付け、DAWでピアノ等の仮音源（<code class="inline">guide.wav</code>）を書き出す。</li>
+        <li><strong>ACE-Step で一発アレンジ：</strong> <code class="inline">guide.wav</code> を ACE-Step（ポート 7866）に読み込み、好みのジャンルタグ（ジャズ、ロック、EDM、オーケストラ等）と強度（0.55前後）を指定して生成。</li>
+        <li><strong>商用リリース・DAW仕上げ：</strong> 生成された高音質WAV（Apache 2.0ライセンスで商用利用OK）をDAWに貼り付け、必要であればステム分離やマスタリングを行って完成です。</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- フッター -->
+  <footer>
+    ACE-Step v1.5 Setup &amp; Optimization Guide (Quadro P6000 24GB / Float32 Patched Edition)
+  </footer>
+
+</div>
+
+<script>
+  function copyCode(button) {
+    const codeWrapper = button.closest('.code-wrapper');
+    const pre = codeWrapper.querySelector('pre');
+    const text = pre.innerText;
+
+    navigator.clipboard.writeText(text).then(() => {
+      const originalText = button.innerText;
+      button.innerText = 'コピー完了！';
+      button.classList.add('copied');
+
+      setTimeout(() => {
+        button.innerText = originalText;
+        button.classList.remove('copied');
+      }, 2000);
+    }).catch(err => {
+      console.error('コピーに失敗しました:', err);
+      button.innerText = 'コピー失敗';
+    });
+  }
+</script>
+</body>
+</html>
